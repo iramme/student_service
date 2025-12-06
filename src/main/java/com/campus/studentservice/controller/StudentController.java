@@ -18,7 +18,7 @@ import java.util.List;
 @RestController // 🧩 Indique à Spring que cette classe gère les requêtes REST (API)
 @RequestMapping("/api/students") // 📍 Chemin de base pour tous les endpoints de ce contrôleur
 @RequiredArgsConstructor // 💉 Lombok : crée un constructeur pour injecter les dépendances finales
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:4200", "*"})
+
 // 🌐 Autorise les requêtes depuis le frontend (Angular/React)
 
 public class StudentController {
