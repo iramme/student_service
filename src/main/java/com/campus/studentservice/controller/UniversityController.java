@@ -3,24 +3,34 @@ package com.campus.studentservice.controller;
 import com.campus.studentservice.model.University;
 import com.campus.studentservice.service.UniversityService;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/universities")
-@RequiredArgsConstructor // ✅ Remplace @Autowired, injection propre via constructeur
-@CrossOrigin("*") // 🌍 Autorise les appels depuis d'autres domaines (utile pour un frontend)
+@RequiredArgsConstructor
+@CrossOrigin(
+    origins = {"http://localhost:3000", "http://127.0.0.1:3000"},
+    allowedHeaders = "*",
+    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, 
+              RequestMethod.DELETE, RequestMethod.OPTIONS},
+    allowCredentials = "true",
+    maxAge = 3600
+)
 public class UniversityController {
-@GetMapping("/test")
-public String test() {
-    return "API is working!";
-}
 
-    // 🧩 Service injecté automatiquement
     private final UniversityService universityService;
+
+    // ============================
+    // 🧪 Endpoint de test
+    // ============================
+    @GetMapping("/test")
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok("✅ API University is working!");
+    }
 
     // ============================
     // 📋 1. Lister toutes les universités
@@ -28,7 +38,6 @@ public String test() {
     @GetMapping
     public ResponseEntity<List<University>> getAllUniversities() {
         List<University> universities = universityService.getAllUniversities();
-        // ✅ HTTP 200 OK avec la liste
         return ResponseEntity.ok(universities);
     }
 
@@ -38,8 +47,8 @@ public String test() {
     @GetMapping("/{id}")
     public ResponseEntity<University> getUniversityById(@PathVariable Long id) {
         return universityService.getUniversityById(id)
-                .map(ResponseEntity::ok) // ✅ Université trouvée → 200 OK
-                .orElse(ResponseEntity.notFound().build()); // ❌ Sinon → 404 Not Found
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // ============================
@@ -48,7 +57,6 @@ public String test() {
     @PostMapping
     public ResponseEntity<University> addUniversity(@RequestBody University university) {
         University saved = universityService.addUniversity(university);
-        // ✅ Retourne 200 OK (tu peux aussi mettre 201 Created avec URI si besoin)
         return ResponseEntity.ok(saved);
     }
 
@@ -59,14 +67,14 @@ public String test() {
     public ResponseEntity<University> updateUniversity(@PathVariable Long id, @RequestBody University university) {
         University updated = universityService.updateUniversity(id, university);
         if (updated == null) {
-            // ❌ Si l’université n’existe pas → 404
             return ResponseEntity.notFound().build();
         }
-        // ✅ Sinon → 200 OK avec les nouvelles données
         return ResponseEntity.ok(updated);
     }
 
-    // 🗑️ 5. Supprimer une université par ID (avec message clair)
+    // ============================
+    // 🗑️ 5. Supprimer une université par ID
+    // ============================
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUniversity(@PathVariable Long id) {
         boolean deleted = universityService.deleteUniversity(id);
@@ -77,5 +85,13 @@ public String test() {
         }
 
         return ResponseEntity.ok("✅ L'université avec l'ID " + id + " a été supprimée avec succès !");
+    }
+
+    // ============================
+    // 🔧 6. Endpoint OPTIONS pour CORS preflight
+    // ============================
+    @RequestMapping(method = RequestMethod.OPTIONS)
+    public ResponseEntity<Void> options() {
+        return ResponseEntity.ok().build();
     }
 }
